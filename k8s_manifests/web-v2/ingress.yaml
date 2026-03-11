@@ -1,0 +1,55 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: production-main-ingress
+  namespace: production
+  annotations:
+    nginx.ingress.kubernetes.io/rewrite-target: /$2
+    nginx.ingress.kubernetes.io/enable-cors: "true"
+    nginx.ingress.kubernetes.io/cors-allow-origin: "*"
+    nginx.ingress.kubernetes.io/cors-allow-methods: "PUT, GET, POST, OPTIONS"
+    nginx.ingress.kubernetes.io/cors-allow-headers: "DNT,X-CustomHeader,Keep-Alive,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type,Authorization"
+    nginx.ingress.kubernetes.io/proxy-connect-timeout: "300"
+    nginx.ingress.kubernetes.io/proxy-read-timeout: "300"
+    nginx.ingress.kubernetes.io/proxy-send-timeout: "300"
+spec:
+  ingressClassName: nginx
+  rules:
+  - host: cafekec.shop
+    http:
+      paths:
+      - path: /main(/|$)(.*)
+        pathType: Prefix
+        backend:
+          service:
+            name: web-v2-service
+            port:
+              number: 80
+      - path: /api/main/weather(/|$)(.*)
+        pathType: Prefix
+        backend:
+          service:
+            name: kma-api
+            port:
+              number: 8080
+      - path: /api/main/energy(/|$)(.*)
+        pathType: Prefix
+        backend:
+          service:
+            name: energy-api
+            port:
+              number: 8000
+      - path: /health/global-status(/|$)(.*)
+        pathType: ImplementationSpecific
+        backend:
+          service:
+            name: energy-api
+            port:
+              number: 8000
+      - path: /api/ai(/|$)(.*)
+        pathType: ImplementationSpecific
+        backend:
+          service:
+            name: ai-rag
+            port:
+              number: 3000
